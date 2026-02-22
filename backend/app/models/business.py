@@ -59,6 +59,9 @@ class Business(Base):
     )
     stripe_customer_id: Mapped[str | None] = mapped_column(Text, nullable=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    supabase_user_id: Mapped[str | None] = mapped_column(
+        Text, unique=True, nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow
     )

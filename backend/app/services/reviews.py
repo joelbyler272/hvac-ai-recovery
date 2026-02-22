@@ -1,20 +1,43 @@
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.review_request import ReviewRequest
+
 
 def get_google_review_link(place_id: str) -> str:
     """Generate a direct link to leave a Google review."""
     return f"https://search.google.com/local/writereview?placeid={place_id}"
 
 
-async def send_review_request(
-    business_id: uuid.UUID, lead_id: uuid.UUID, phone: str, review_url: str
-) -> None:
-    """Send a review request SMS after job completion."""
-    # TODO: Implement review request via Celery delayed task (2hr delay)
-    pass
+async def create_review_request(
+    db: AsyncSession,
+    business_id: uuid.UUID,
+    lead_id: uuid.UUID,
+    phone: str,
+    review_url: str,
+) -> ReviewRequest:
+    """Create a review request record and schedule sending."""
+    rr = ReviewRequest(
+        business_id=business_id,
+        lead_id=lead_id,
+        phone=phone,
+        review_url=review_url,
+        status="pending",
+    )
+    db.add(rr)
+    await db.flush()
 
+    # Schedule Celery task to send in 2 hours
+    try:
+        from app.worker.tasks import celery_app
 
-async def send_review_reminder(review_request_id: uuid.UUID) -> None:
-    """Send a single reminder if no review after 48 hours."""
-    # TODO: Implement reminder via Celery
-    pass
+        celery_app.send_task(
+            "send_review_request",
+            args=[str(rr.id)],
+            countdown=2 * 60 * 60,
+        )
+    except Exception:
+        pass  # Celery may not be running in dev
+
+    return rr

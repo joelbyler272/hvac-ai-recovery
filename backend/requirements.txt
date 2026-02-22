@@ -36,5 +36,8 @@ pytest==8.3.4
 pytest-asyncio==0.25.0
 httpx==0.28.1
 
+# Sync DB driver (for Celery tasks)
+psycopg2-binary==2.9.10
+
 # Stripe
 stripe==11.4.1

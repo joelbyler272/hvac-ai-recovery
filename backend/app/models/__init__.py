@@ -8,6 +8,8 @@ from app.models.review_request import ReviewRequest
 from app.models.opt_out import OptOut
 from app.models.audit_log import AuditLog
 from app.models.daily_metric import DailyMetric
+from app.models.service import Service
+from app.models.calendar_integration import CalendarIntegration
 
 __all__ = [
     "Business",
@@ -20,4 +22,6 @@ __all__ = [
     "OptOut",
     "AuditLog",
     "DailyMetric",
+    "Service",
+    "CalendarIntegration",
 ]

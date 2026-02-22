@@ -1,40 +1,37 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import Response
+from sqlalchemy.ext.asyncio import AsyncSession
 from twilio.twiml.voice_response import VoiceResponse
 
 from app.config import get_settings
+from app.database import get_db
 from app.services.voice import (
     get_business_by_twilio_number,
     create_call_record,
     is_after_hours,
     get_call,
     update_call,
-)
-from app.services.sms import send_sms
-from app.services.notifications import notify_owner
-from app.services.follow_up import schedule_follow_up
-from app.services.voice import (
     is_opted_out,
     get_active_conversation,
     create_or_get_lead,
     create_conversation,
 )
+from app.services.sms import send_sms
+from app.services.notifications import notify_owner
+from app.services.follow_up import schedule_follow_up
 
 router = APIRouter()
 settings = get_settings()
 
 
 @router.post("/incoming")
-async def voice_incoming(request: Request):
-    """
-    Twilio sends this when a call comes in.
-    Ring the HVAC company's phone, detect if missed.
-    """
+async def voice_incoming(request: Request, db: AsyncSession = Depends(get_db)):
+    """Twilio sends this when a call comes in."""
     form = await request.form()
     from_number = form.get("From")
     to_number = form.get("To")
 
-    business = await get_business_by_twilio_number(to_number)
+    business = await get_business_by_twilio_number(db, to_number)
 
     if not business:
         response = VoiceResponse()
@@ -42,6 +39,7 @@ async def voice_incoming(request: Request):
         return Response(content=str(response), media_type="application/xml")
 
     call = await create_call_record(
+        db,
         business_id=business.id,
         twilio_call_sid=form.get("CallSid"),
         caller_phone=from_number,
@@ -50,7 +48,6 @@ async def voice_incoming(request: Request):
     )
 
     response = VoiceResponse()
-
     dial = response.dial(
         timeout=20,
         action=f"{settings.base_url}/webhook/voice/call-completed?call_id={call.id}",
@@ -67,23 +64,24 @@ async def voice_incoming(request: Request):
 
 
 @router.post("/call-completed")
-async def call_completed(request: Request, call_id: str):
-    """
-    Fires after <Dial> completes. Detects missed calls and triggers SMS flow.
-    """
+async def call_completed(
+    request: Request, call_id: str, db: AsyncSession = Depends(get_db)
+):
+    """Fires after Dial completes. Detects missed calls and triggers SMS flow."""
     form = await request.form()
     dial_status = form.get("DialCallStatus")
     caller_phone = form.get("From")
 
-    call = await get_call(call_id)
-    business = await get_business_by_twilio_number(form.get("To"))
+    call = await get_call(db, call_id)
+    business = await get_business_by_twilio_number(db, form.get("To"))
 
-    if not business:
+    if not business or not call:
         response = VoiceResponse()
         return Response(content=str(response), media_type="application/xml")
 
     if dial_status == "completed":
         await update_call(
+            db,
             call.id,
             status="answered",
             duration=int(form.get("DialCallDuration", 0)),
@@ -92,28 +90,24 @@ async def call_completed(request: Request, call_id: str):
         return Response(content=str(response), media_type="application/xml")
 
     # === MISSED CALL ===
-    await update_call(call.id, status="missed")
+    await update_call(db, call.id, status="missed")
 
-    if await is_opted_out(caller_phone, business.id):
+    if await is_opted_out(db, caller_phone, business.id):
         response = VoiceResponse()
         response.say("Sorry we missed your call. Please try again later.")
         return Response(content=str(response), media_type="application/xml")
 
     existing_convo = await get_active_conversation(
-        business_id=business.id, phone=caller_phone
+        db, business_id=business.id, phone=caller_phone
     )
 
     if not existing_convo:
         lead = await create_or_get_lead(
-            business_id=business.id,
-            phone=caller_phone,
-            source="missed_call",
+            db, business_id=business.id, phone=caller_phone, source="missed_call"
         )
 
         conversation = await create_conversation(
-            business_id=business.id,
-            lead_id=lead.id,
-            call_id=call.id,
+            db, business_id=business.id, lead_id=lead.id, call_id=call.id
         )
 
         greeting = business.ai_greeting or (
@@ -122,6 +116,7 @@ async def call_completed(request: Request, call_id: str):
         )
 
         await send_sms(
+            db,
             to=caller_phone,
             from_=business.twilio_number,
             body=greeting,

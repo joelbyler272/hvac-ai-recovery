@@ -1,5 +1,9 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+# .env lives at the project root (one level above backend/)
+_env_file = Path(__file__).resolve().parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -31,9 +35,33 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
 
+    # Admin
+    admin_api_key: str = "dev-admin-key"
+
+    # CORS (comma-separated origins for production)
+    allowed_origins: str = ""
+
+    # Email sender (must be verified in Resend)
+    email_from_address: str = "CallRecover <notifications@callrecover.com>"
+
+    # Subscription cost for ROI calculation
+    subscription_cost: float = 497.0
+
+    # Follow-up delays in minutes [second follow-up, third follow-up]
+    follow_up_delay_minutes: str = "1440,4320"
+
+    # Google Calendar OAuth
+    google_client_id: str = ""
+    google_client_secret: str = ""
+
+    # Microsoft Outlook OAuth
+    microsoft_client_id: str = ""
+    microsoft_client_secret: str = ""
+
     model_config = {
-        "env_file": ".env",
+        "env_file": str(_env_file),
         "env_file_encoding": "utf-8",
+        "extra": "ignore",
     }
 
 

@@ -26,5 +26,5 @@ class AuditLog(Base):
     )
 
     __table_args__ = (
-        Index("idx_audit_business", "business_id", created_at.desc()),
+        Index("idx_audit_business", "business_id", "created_at"),
     )

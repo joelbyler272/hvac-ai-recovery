@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import create_engine, pool
 from alembic import context
 
 from app.config import get_settings
@@ -10,8 +10,10 @@ from app.models import *  # noqa: F401, F403 - Import all models for autogenerat
 config = context.config
 settings = get_settings()
 
-# Override sqlalchemy.url with the actual database URL
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Get the sync database URL (Alembic needs sync, not async)
+_db_url = settings.database_url
+if _db_url.startswith("postgresql+asyncpg://"):
+    _db_url = _db_url.replace("postgresql+asyncpg://", "postgresql://", 1)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -21,9 +23,8 @@ target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=_db_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -35,11 +36,7 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = create_engine(_db_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Text, Integer, ForeignKey, TIMESTAMP, Index
+from sqlalchemy import Text, Integer, ForeignKey, TIMESTAMP, Index, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -44,6 +44,6 @@ class Conversation(Base):
         Index(
             "idx_convos_followup",
             "next_follow_up_at",
-            postgresql_where=(status == "follow_up"),
+            postgresql_where=text("status = 'follow_up'"),
         ),
     )

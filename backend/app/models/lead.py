@@ -30,6 +30,7 @@ class Lead(Base):
     estimated_value: Mapped[float | None] = mapped_column(
         DECIMAL(10, 2), nullable=True
     )
+    preferred_time: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow

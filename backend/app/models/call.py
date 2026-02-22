@@ -29,6 +29,6 @@ class Call(Base):
     )
 
     __table_args__ = (
-        Index("idx_calls_business", "business_id", created_at.desc()),
+        Index("idx_calls_business", "business_id", "created_at"),
         Index("idx_calls_caller", "caller_phone", "business_id"),
     )
