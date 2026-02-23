@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     allowed_origins: str = ""
 
     # Email sender (must be verified in Resend)
-    email_from_address: str = "CallRecover <notifications@callrecover.com>"
+    email_from_address: str = "CallHook <notifications@callhook.com>"
 
     # Subscription cost for ROI calculation
     subscription_cost: float = 497.0

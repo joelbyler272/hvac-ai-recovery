@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (!supabaseUrl) {
       setLoading(false);
-      setUser({ id: "dev-user", email: "dev@callrecover.com" } as User);
+      setUser({ id: "dev-user", email: "dev@callhook.com" } as User);
       setSession({ access_token: "dev-token" } as Session);
       return;
     }

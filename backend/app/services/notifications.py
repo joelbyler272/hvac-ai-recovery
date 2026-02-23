@@ -63,7 +63,7 @@ async def notify_owner(business: Business, event: str, data: dict) -> None:
                 {
                     "from": settings.email_from_address,
                     "to": business.owner_email,
-                    "subject": f"CallRecover: {event.replace('_', ' ').title()}",
+                    "subject": f"CallHook: {event.replace('_', ' ').title()}",
                     "text": message,
                 }
             )
@@ -87,7 +87,7 @@ def build_notification_message(event: str, data: dict, business: Business) -> st
         ),
         "new_message": f"New message from {format_phone(data.get('from', ''))}",
     }
-    return templates.get(event, f"CallRecover notification: {event}")
+    return templates.get(event, f"CallHook notification: {event}")
 
 
 def _build_qualified_message(data: dict) -> str:

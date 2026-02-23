@@ -1,16 +1,16 @@
-# CallRecover — AI-Powered Missed Call Recovery for Service Businesses
+# CallHook — AI-Powered Missed Call Recovery for Service Businesses
 
 Turn every missed call into a booked job. Open-source.
 
-CallRecover automatically texts back missed callers, qualifies leads through AI-powered SMS conversations, and books appointments — so you never lose a job to a competitor again.
+CallHook automatically texts back missed callers, qualifies leads through AI-powered SMS conversations, and books appointments — so you never lose a job to a competitor again.
 
 Built for HVAC, plumbing, electrical, and other service businesses.
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/yourusername/callrecover.git
-cd callrecover
+git clone https://github.com/yourusername/callhook.git
+cd callhook
 cp .env.example .env  # Add your API keys
 docker compose up
 ```

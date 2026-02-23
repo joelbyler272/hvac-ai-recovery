@@ -6,6 +6,50 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
+function CallHookLogo() {
+  return (
+    <svg viewBox="0 0 360 80" className="h-10 w-auto mx-auto" aria-label="CallHook">
+      <g transform="translate(4, 8)">
+        <path
+          d="M2 24 L16 44 L16 12 C16 5 21 0 28 0 C35 0 40 5 40 12"
+          stroke="#1B2A4A"
+          strokeWidth="5"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M44 8 C48 4 48 -2 44 -4"
+          stroke="#E86A2A"
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+          opacity="0.5"
+        />
+        <path
+          d="M48 12 C54 6 54 -4 48 -8"
+          stroke="#E86A2A"
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+          opacity="0.3"
+        />
+      </g>
+      <text
+        x="64"
+        y="50"
+        fontFamily="Inter, sans-serif"
+        fontWeight="800"
+        fontSize="40"
+        letterSpacing="-1.5"
+      >
+        <tspan fill="#1B2A4A">Call</tspan>
+        <tspan fill="#E86A2A">Hook</tspan>
+      </text>
+    </svg>
+  );
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -45,32 +89,30 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
+      <div className="min-h-screen flex items-center justify-center bg-warm-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ember" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-warm-white">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            <span className="text-brand-600">Call</span>Recover
-          </h1>
-          <p className="mt-2 text-gray-600">
-            AI-Powered Missed Call Recovery
+          <CallHookLogo />
+          <p className="mt-3 text-slate-light">
+            Never lose a job to a missed call.
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <div className="bg-red-50 border border-red-200 rounded-card p-4 text-center">
             <p className="text-red-800 text-sm">{error}</p>
           </div>
         )}
 
         {sent ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+          <div className="bg-green-50 border border-green-200 rounded-card p-4 text-center">
             <p className="text-green-800">
               Check your email for a login link.
             </p>
@@ -80,7 +122,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-navy"
               >
                 Email address
               </label>
@@ -90,13 +132,13 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-ember focus:border-ember text-navy"
                 placeholder="you@yourbusiness.com"
               />
             </div>
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-ember hover:bg-ember-dark active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ember"
             >
               Send Magic Link
             </button>

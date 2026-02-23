@@ -15,7 +15,8 @@ import {
 } from "@/lib/api";
 import { formatPhone } from "@/lib/utils";
 import { useRealtimeMessages } from "@/hooks/use-realtime";
-import { Send, Bot, User, ArrowLeftRight, AlertTriangle } from "lucide-react";
+import { Send, Bot, User, ArrowLeftRight, AlertTriangle, MessageSquare } from "lucide-react";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 export default function ConversationsPage() {
   const { token } = useAuth();
@@ -72,7 +73,7 @@ export default function ConversationsPage() {
         {/* Conversation List */}
         <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto">
           <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Conversations</h2>
+            <h2 className="text-lg font-semibold text-navy">Conversations</h2>
           </div>
           {isError ? (
             <div className="p-6 flex items-center gap-3 text-red-600">
@@ -80,21 +81,19 @@ export default function ConversationsPage() {
               <p className="text-sm">Failed to load.</p>
             </div>
           ) : isLoading ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-600 mx-auto" />
-            </div>
+            <SkeletonList rows={4} />
           ) : listData?.conversations?.length ? (
             <ul className="divide-y divide-gray-50">
               {listData.conversations.map((c: Conversation) => (
                 <li key={c.id}>
                   <button
                     onClick={() => setSelectedId(c.id)}
-                    className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                      selectedId === c.id ? "bg-brand-50 border-l-2 border-brand-600" : ""
+                    className={`w-full text-left px-4 py-3 hover:bg-warm-white transition-colors ${
+                      selectedId === c.id ? "bg-ember/5 border-l-2 border-ember" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-navy truncate">
                         {c.lead_name || formatPhone(c.lead_phone || "Unknown")}
                       </p>
                       <span
@@ -102,14 +101,14 @@ export default function ConversationsPage() {
                           c.status === "human_active"
                             ? "bg-purple-50 text-purple-700"
                             : c.status === "active"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-gray-50 text-gray-600"
+                            ? "bg-teal/10 text-teal"
+                            : "bg-gray-100 text-slate-light"
                         }`}
                       >
                         {c.status === "human_active" ? "Human" : c.status}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5 truncate">
+                    <p className="text-xs text-slate-muted mt-0.5 truncate">
                       {c.last_message || "No messages yet"}
                     </p>
                   </button>
@@ -117,27 +116,31 @@ export default function ConversationsPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-center py-8 text-sm">
-              No active conversations.
-            </p>
+            <div className="text-center py-12 px-4">
+              <MessageSquare className="h-8 w-8 text-slate-muted mx-auto mb-3" />
+              <p className="text-sm font-medium text-navy">No active conversations</p>
+              <p className="text-xs text-slate-muted mt-1">
+                Conversations start when missed calls are recovered.
+              </p>
+            </div>
           )}
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-50">
+        <div className="flex-1 flex flex-col bg-warm-white">
           {selectedId && convo ? (
             <>
               {/* Chat Header */}
               <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-navy">
                     {convo.lead_name || "Unknown"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs">
                     {convo.status === "human_active" ? (
                       <span className="text-purple-600">You are responding</span>
                     ) : (
-                      <span className="text-green-600">AI is responding</span>
+                      <span className="text-teal">AI is responding</span>
                     )}
                   </p>
                 </div>
@@ -147,7 +150,7 @@ export default function ConversationsPage() {
                       ? returnMutation.mutate(selectedId)
                       : takeoverMutation.mutate(selectedId)
                   }
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 hover:bg-warm-white transition-colors text-navy"
                 >
                   <ArrowLeftRight className="h-4 w-4" />
                   {convo.status === "human_active" ? "Return to AI" : "Take Over"}
@@ -168,8 +171,8 @@ export default function ConversationsPage() {
                         msg.direction === "outbound"
                           ? msg.sender_type === "human"
                             ? "bg-purple-100 text-purple-900"
-                            : "bg-brand-100 text-brand-900"
-                          : "bg-white text-gray-900 border border-gray-200"
+                            : "bg-ember/10 text-navy"
+                          : "bg-white text-navy border border-gray-200"
                       }`}
                     >
                       <div className="flex items-center gap-1 mb-0.5">
@@ -204,12 +207,12 @@ export default function ConversationsPage() {
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                       placeholder="Type a message..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-ember"
                     />
                     <button
                       type="submit"
                       disabled={!messageText.trim() || sendMutation.isPending}
-                      className="px-4 py-2 bg-brand-600 text-white rounded-md text-sm font-medium hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                      className="px-4 py-2 bg-ember text-white rounded-lg text-sm font-medium hover:bg-ember-dark disabled:opacity-50 transition-colors active:scale-[0.98]"
                     >
                       <Send className="h-4 w-4" />
                     </button>
@@ -218,7 +221,7 @@ export default function ConversationsPage() {
               )}
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400">
+            <div className="flex-1 flex items-center justify-center text-slate-muted">
               Select a conversation to view
             </div>
           )}

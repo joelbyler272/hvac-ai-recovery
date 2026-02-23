@@ -18,7 +18,7 @@ from app.api.calendar import router as calendar_router
 settings = get_settings()
 
 app = FastAPI(
-    title="CallRecover API",
+    title="CallHook API",
     description="AI-Powered Missed Call Recovery for Service Businesses",
     version="1.0.0",
 )

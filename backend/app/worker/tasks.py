@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 celery_app = Celery(
-    "callrecover",
+    "callhook",
     broker=settings.redis_url,
     backend=settings.redis_url,
 )
@@ -459,7 +459,7 @@ def send_weekly_report():
                 resend.Emails.send({
                     "from": settings.email_from_address,
                     "to": biz.owner_email,
-                    "subject": f"CallRecover Weekly Report - {biz.name}",
+                    "subject": f"CallHook Weekly Report - {biz.name}",
                     "text": body,
                 })
             except Exception as e:

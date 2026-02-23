@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth-context";
 import { getLead, type Message } from "@/lib/api";
 import { formatPhone } from "@/lib/utils";
 import { useRealtimeMessages } from "@/hooks/use-realtime";
+import { SkeletonLine } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/status-badge";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -15,6 +17,7 @@ import {
   AlertTriangle,
   Clock,
   User,
+  MessageSquare,
 } from "lucide-react";
 
 export default function LeadDetailPage({ params }: { params: { id: string } }) {
@@ -29,15 +32,27 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
   const lead = data?.lead;
   const messages = data?.messages || [];
 
-  // Subscribe to realtime message updates
   const convoId = data?.conversations?.[0]?.id;
   useRealtimeMessages(convoId);
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="p-6 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-card shadow-card p-5 space-y-4">
+              <SkeletonLine className="h-6 w-32" />
+              <SkeletonLine className="h-4 w-48" />
+              <SkeletonLine className="h-4 w-40" />
+              <SkeletonLine className="h-4 w-36" />
+            </div>
+            <div className="lg:col-span-2 bg-white rounded-card shadow-card p-5 space-y-3">
+              <SkeletonLine className="h-6 w-28" />
+              <SkeletonLine className="h-12 w-3/4" />
+              <SkeletonLine className="h-12 w-2/3 ml-auto" />
+              <SkeletonLine className="h-12 w-3/4" />
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -47,7 +62,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
     return (
       <DashboardLayout>
         <div className="p-6">
-          <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+          <div className="flex items-center gap-3 rounded-card border border-red-200 bg-red-50 p-4">
             <AlertTriangle className="h-5 w-5 text-red-600" />
             <p className="text-sm text-red-800">Failed to load lead details. Please try refreshing.</p>
           </div>
@@ -60,7 +75,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
     return (
       <DashboardLayout>
         <div className="p-6">
-          <p className="text-gray-500">Lead not found.</p>
+          <p className="text-slate-light">Lead not found.</p>
         </div>
       </DashboardLayout>
     );
@@ -71,7 +86,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
       <div className="p-6">
         <Link
           href="/leads"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm text-slate-light hover:text-navy mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Leads
@@ -80,8 +95,8 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Lead Info Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-5">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-card shadow-card p-5">
+              <h2 className="text-lg font-semibold text-navy mb-4">
                 {lead.name || "Unknown"}
               </h2>
 
@@ -99,20 +114,10 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                 <InfoRow icon={User} label="Source" value={lead.source || "missed_call"} />
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    lead.status === "qualified"
-                      ? "bg-green-50 text-green-700"
-                      : lead.status === "booked"
-                      ? "bg-purple-50 text-purple-700"
-                      : "bg-blue-50 text-blue-700"
-                  }`}
-                >
-                  {lead.status}
-                </span>
-                {lead.estimated_value > 0 && (
-                  <span className="ml-2 text-sm text-gray-500">
+              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
+                <StatusBadge status={lead.status} variant="lead" />
+                {(lead.estimated_value ?? 0) > 0 && (
+                  <span className="text-sm text-ember font-medium">
                     Est. ${lead.estimated_value}
                   </span>
                 )}
@@ -122,8 +127,8 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
 
           {/* Conversation Timeline */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg border border-gray-200 p-5">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-card shadow-card p-5">
+              <h3 className="text-lg font-semibold text-navy mb-4">
                 Conversation
               </h3>
 
@@ -141,8 +146,8 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                           msg.direction === "outbound"
                             ? msg.sender_type === "human"
                               ? "bg-purple-100 text-purple-900"
-                              : "bg-brand-100 text-brand-900"
-                            : "bg-gray-100 text-gray-900"
+                              : "bg-ember/10 text-navy"
+                            : "bg-gray-100 text-navy"
                         }`}
                       >
                         <p className="text-sm">{msg.body}</p>
@@ -155,9 +160,13 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">
-                  No messages yet.
-                </p>
+                <div className="text-center py-12">
+                  <MessageSquare className="h-8 w-8 text-slate-muted mx-auto mb-3" />
+                  <p className="text-sm font-medium text-navy">No messages yet</p>
+                  <p className="text-xs text-slate-muted mt-1">
+                    Messages will appear here once the AI conversation begins.
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -180,10 +189,10 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-start gap-2.5">
-      <Icon className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+      <Icon className="h-4 w-4 text-slate-muted mt-0.5 flex-shrink-0" />
       <div>
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className={`text-sm ${highlight ? "text-red-600 font-medium" : "text-gray-900"}`}>
+        <p className="text-xs text-slate-muted">{label}</p>
+        <p className={`text-sm ${highlight ? "text-red-600 font-medium" : "text-navy"}`}>
           {value}
         </p>
       </div>

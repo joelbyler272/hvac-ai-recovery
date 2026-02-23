@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-navy: #1B2A4A;
+    --color-navy-deep: #111D35;
+    --color-navy-light: #243556;
+    --color-ember: #E86A2A;
+    --color-ember-dark: #D15A1E;
+    --color-ember-glow: #F4813F;
+    --color-warm-white: #FAF7F2;
+    --color-slate: #4A5568;
+    --color-slate-light: #718096;
+    --color-slate-muted: #A0AEC0;
+    --color-teal: #38B2AC;
+  }
+
+  /* Focus-visible for keyboard navigation */
+  *:focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Minimum touch targets on mobile */
+  @media (pointer: coarse) {
+    button,
+    a,
+    [role="button"] {
+      min-height: 44px;
+    }
+  }
+}
