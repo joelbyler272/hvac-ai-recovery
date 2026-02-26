@@ -29,6 +29,9 @@ class Conversation(Base):
         TIMESTAMP(timezone=True), nullable=True
     )
     qualification_data: Mapped[dict] = mapped_column(JSONB, default=dict)
+    channel: Mapped[str] = mapped_column(Text, nullable=False, default="sms")
+    # voice, sms, mixed
+    voice_transcript: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow
     )

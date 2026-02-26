@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     # Follow-up delays in minutes [second follow-up, third follow-up]
     follow_up_delay_minutes: str = "1440,4320"
 
+    # Owner nudge delay (remind owner to call back qualified leads)
+    owner_nudge_delay_minutes: int = 30
+
+    # Vapi.ai (Voice AI)
+    vapi_api_key: str = ""
+    vapi_webhook_secret: str = ""
+
     # Google Calendar OAuth
     google_client_id: str = ""
     google_client_secret: str = ""

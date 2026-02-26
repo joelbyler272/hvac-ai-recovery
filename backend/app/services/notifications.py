@@ -73,18 +73,18 @@ async def notify_owner(business: Business, event: str, data: dict) -> None:
 
 def build_notification_message(event: str, data: dict, business: Business) -> str:
     """Build human-readable notification messages."""
+    voice_ai = data.get("voice_ai", False)
+    follow_up_method = "Voice AI is handling the call." if voice_ai else "AI is following up via SMS."
+
     templates = {
         "missed_call": (
             f"Missed call from {format_phone(data.get('caller_phone', ''))}. "
-            f"AI is following up now."
+            f"{follow_up_method}"
         ),
         "qualified_lead": _build_qualified_message(data),
         "appointment_booked": "New appointment booked! Check your dashboard for details.",
         "emergency": _build_emergency_message(data),
-        "human_needed": (
-            "AI needs help with a conversation. "
-            "Please check the dashboard and take over."
-        ),
+        "human_needed": _build_human_needed_message(data),
         "new_message": f"New message from {format_phone(data.get('from', ''))}",
     }
     return templates.get(event, f"CallHook notification: {event}")
@@ -113,6 +113,8 @@ def _build_emergency_message(data: dict) -> str:
     if not lead:
         return "EMERGENCY lead! Check dashboard immediately."
     parts = ["EMERGENCY LEAD!"]
+    if data.get("reason"):
+        parts.append(f"Reason: {data['reason']}")
     if hasattr(lead, "name") and lead.name:
         parts.append(f"{lead.name}")
     if hasattr(lead, "address") and lead.address:
@@ -121,5 +123,21 @@ def _build_emergency_message(data: dict) -> str:
         parts.append(f"Issue: {lead.service_needed}")
     if hasattr(lead, "phone") and lead.phone:
         parts.append(f"Phone: {format_phone(lead.phone)}")
+    elif data.get("caller_phone"):
+        parts.append(f"Phone: {format_phone(data['caller_phone'])}")
     parts.append("CALL THEM IMMEDIATELY")
+    return "\n".join(parts)
+
+
+def _build_human_needed_message(data: dict) -> str:
+    reason = data.get("reason", "")
+    caller_phone = data.get("caller_phone", "")
+    parts = []
+    if reason:
+        parts.append(reason)
+    else:
+        parts.append("AI needs help with a conversation.")
+    if caller_phone:
+        parts.append(f"Phone: {format_phone(caller_phone)}")
+    parts.append("Please check the dashboard and take over.")
     return "\n".join(parts)

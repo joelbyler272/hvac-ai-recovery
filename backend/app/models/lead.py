@@ -32,6 +32,9 @@ class Lead(Base):
     )
     preferred_time: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    qualification_source: Mapped[str] = mapped_column(
+        Text, nullable=False, default="sms"
+    )  # voice, sms, mixed
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow
     )

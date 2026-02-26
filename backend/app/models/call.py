@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Text, Integer, Boolean, ForeignKey, TIMESTAMP, Index
+from sqlalchemy import Text, Integer, Boolean, ForeignKey, TIMESTAMP, Index, DECIMAL
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -27,6 +27,14 @@ class Call(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow
     )
+
+    # Voice AI fields
+    voice_ai_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    voice_ai_transcript: Mapped[str | None] = mapped_column(Text, nullable=True)
+    voice_ai_duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    voice_ai_cost: Mapped[float | None] = mapped_column(DECIMAL(10, 4), nullable=True)
+    line_type: Mapped[str] = mapped_column(Text, nullable=False, default="unknown")
+    vapi_call_id: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     __table_args__ = (
         Index("idx_calls_business", "business_id", "created_at"),

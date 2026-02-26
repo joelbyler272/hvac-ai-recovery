@@ -10,6 +10,8 @@ from app.models.audit_log import AuditLog
 from app.models.daily_metric import DailyMetric
 from app.models.service import Service
 from app.models.calendar_integration import CalendarIntegration
+from app.models.voice_ai_config import VoiceAIConfig
+from app.models.owner_nudge import OwnerNudge
 
 __all__ = [
     "Business",
@@ -24,4 +26,6 @@ __all__ = [
     "DailyMetric",
     "Service",
     "CalendarIntegration",
+    "VoiceAIConfig",
+    "OwnerNudge",
 ]

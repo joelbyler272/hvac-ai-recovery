@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.api.webhooks.voice import router as voice_router
 from app.api.webhooks.sms import router as sms_router
+from app.api.webhooks.vapi import router as vapi_router
 from app.api.dashboard import router as dashboard_router
 from app.api.leads import router as leads_router
 from app.api.conversations import router as conversations_router
@@ -36,9 +37,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Webhook routes (Twilio)
+# Webhook routes (Twilio + Vapi)
 app.include_router(voice_router, prefix="/webhook/voice", tags=["Webhooks - Voice"])
 app.include_router(sms_router, prefix="/webhook/sms", tags=["Webhooks - SMS"])
+app.include_router(vapi_router, prefix="/webhook/vapi", tags=["Webhooks - Vapi"])
 
 # Dashboard API routes
 app.include_router(dashboard_router, prefix="/api/dashboard", tags=["Dashboard"])

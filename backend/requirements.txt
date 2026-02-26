@@ -41,3 +41,5 @@ psycopg2-binary==2.9.10
 
 # Stripe
 stripe==11.4.1
+
+# Vapi.ai (Voice AI) — uses httpx for API calls (already installed)

@@ -138,12 +138,14 @@ async def create_conversation(
     business_id: uuid.UUID,
     lead_id: uuid.UUID,
     call_id: uuid.UUID | None = None,
+    channel: str = "sms",
 ) -> Conversation:
     """Create a new conversation."""
     conversation = Conversation(
         business_id=business_id,
         lead_id=lead_id,
         call_id=call_id,
+        channel=channel,
         status="active",
     )
     db.add(conversation)

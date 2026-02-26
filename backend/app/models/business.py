@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Text, ARRAY, DECIMAL, TIMESTAMP
+from sqlalchemy import String, Text, Boolean, ARRAY, DECIMAL, TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -61,6 +61,15 @@ class Business(Base):
     stripe_subscription_id: Mapped[str | None] = mapped_column(Text, nullable=True)
     supabase_user_id: Mapped[str | None] = mapped_column(
         Text, unique=True, nullable=True
+    )
+    # Voice AI fields
+    vapi_assistant_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    google_place_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    call_recording_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+    two_party_consent_state: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
     )
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow
