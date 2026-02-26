@@ -4,7 +4,7 @@
 
 ## Summary
 
-This PR transforms CallRecover from an SMS text-back system into a voice AI receptionist. Instead of texting callers after a missed call, CallRecover now answers the call with AI, qualifies the lead through natural conversation, and books the appointment — all before the caller hangs up.
+This PR transforms CallHook from an SMS text-back system into a voice AI receptionist. Instead of texting callers after a missed call, CallHook now answers the call with AI, qualifies the lead through natural conversation, and books the appointment — all before the caller hangs up.
 
 SMS becomes a secondary channel for post-call confirmations, incomplete call recovery, review requests, and inbound text handling.
 

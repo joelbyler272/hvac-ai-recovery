@@ -1,14 +1,14 @@
-# CallRecover — Complete Implementation Specification
+# CallHook — Complete Implementation Specification
 
 **Version:** 2.0
 **Date:** February 23, 2026
-**Purpose:** Definitive document for what CallRecover is, how it works, and what needs to be built. Hand this to Claude Code as the master spec.
+**Purpose:** Definitive document for what CallHook is, how it works, and what needs to be built. Hand this to Claude Code as the master spec.
 
 ---
 
-## 1. What CallRecover Is
+## 1. What CallHook Is
 
-CallRecover is an AI-powered phone system for HVAC and home service businesses that makes sure every call gets answered. When a business can't pick up the phone, CallRecover's voice AI answers the call, talks to the customer naturally, qualifies the lead, and books an appointment — all before the caller hangs up and calls a competitor.
+CallHook is an AI-powered phone system for HVAC and home service businesses that makes sure every call gets answered. When a business can't pick up the phone, CallHook's voice AI answers the call, talks to the customer naturally, qualifies the lead, and books an appointment — all before the caller hangs up and calls a competitor.
 
 It is NOT a chatbot, a missed call text-back tool, an answering service, a CRM, or a marketing platform.
 
@@ -16,7 +16,7 @@ It IS an AI receptionist that answers missed calls, qualifies leads, recovers re
 
 **The core promise:** Every call gets answered. Every lead gets captured. No job goes to your competitor.
 
-**The product in one sentence:** CallRecover answers your missed calls with AI, qualifies the lead, and books the appointment — so you never lose a job again.
+**The product in one sentence:** CallHook answers your missed calls with AI, qualifies the lead, and books the appointment — so you never lose a job again.
 
 ---
 
@@ -45,7 +45,7 @@ It IS an AI receptionist that answers missed calls, qualifies leads, recovers re
 
 ### Step 1: Call Comes In
 
-Caller dials HVAC company's phone number. The call forwards to CallRecover's Twilio number (configured via call forwarding on the HVAC company's existing phone). Twilio receives the call and hits /webhook/voice/incoming. System looks up which business this Twilio number belongs to, logs the call (status: "ringing"), and rings the HVAC company's real phone via Twilio Dial with a 20-second timeout. The caller hears normal ringing.
+Caller dials HVAC company's phone number. The call forwards to CallHook's Twilio number (configured via call forwarding on the HVAC company's existing phone). Twilio receives the call and hits /webhook/voice/incoming. System looks up which business this Twilio number belongs to, logs the call (status: "ringing"), and rings the HVAC company's real phone via Twilio Dial with a 20-second timeout. The caller hears normal ringing.
 
 ### Step 2: Answered or Missed?
 

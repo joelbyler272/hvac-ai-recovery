@@ -1,5 +1,5 @@
 -- ============================================================
--- CallRecover — Dev Seed: Create a test business
+-- CallHook — Dev Seed: Create a test business
 -- ============================================================
 -- Run this after all setup scripts to create a test business
 -- for local development.

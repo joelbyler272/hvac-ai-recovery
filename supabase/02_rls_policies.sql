@@ -1,5 +1,5 @@
 -- ============================================================
--- CallRecover — Supabase Setup: Step 2 — Row Level Security
+-- CallHook — Supabase Setup: Step 2 — Row Level Security
 -- ============================================================
 -- Run this AFTER the Alembic migration has created all tables.
 --

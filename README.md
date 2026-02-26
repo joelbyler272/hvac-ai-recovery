@@ -1,16 +1,16 @@
-# CallRecover — AI Voice Receptionist for Service Businesses
+# CallHook — AI Voice Receptionist for Service Businesses
 
 Every call answered. Every lead captured. No job lost to a competitor.
 
-When an HVAC company misses a call, CallRecover's voice AI answers it — talks to the customer, qualifies the lead, and books the appointment before they hang up and call someone else.
+When an HVAC company misses a call, CallHook's voice AI answers it — talks to the customer, qualifies the lead, and books the appointment before they hang up and call someone else.
 
 Built for HVAC, plumbing, electrical, and home service businesses. Open-source.
 
 ## How It Works
 
 1. Customer calls your business number
-2. Your phone rings for 20 seconds — if your team picks up, the call connects normally and CallRecover stays invisible
-3. If nobody answers, CallRecover's voice AI picks up the call seamlessly
+2. Your phone rings for 20 seconds — if your team picks up, the call connects normally and CallHook stays invisible
+3. If nobody answers, CallHook's voice AI picks up the call seamlessly
 4. The AI has a natural phone conversation: finds out what they need, gets their name and address, and offers to schedule service
 5. You get an instant notification with the qualified lead, full transcript, and call recording
 6. A confirmation text goes to the caller with their booking details
@@ -19,7 +19,7 @@ The customer never knows they talked to AI. They called, someone answered, they'
 
 ## Why Voice AI Instead of Text-Back?
 
-Every other missed call tool sends a text message after the call ends. That loses 15-25% of callers (landlines, non-texters, older homeowners) and gives them time to call your competitor. CallRecover answers the actual call — the customer never hangs up, never waits, never leaves.
+Every other missed call tool sends a text message after the call ends. That loses 15-25% of callers (landlines, non-texters, older homeowners) and gives them time to call your competitor. CallHook answers the actual call — the customer never hangs up, never waits, never leaves.
 
 ## Features
 

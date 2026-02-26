@@ -1,6 +1,6 @@
 # Supabase Setup Guide
 
-Complete guide to set up Supabase for CallRecover.
+Complete guide to set up Supabase for CallHook.
 
 ## 1. Create a Supabase Project
 
