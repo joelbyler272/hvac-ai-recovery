@@ -87,6 +87,97 @@ async def update_business_endpoint(
     return {"business": biz_to_dict(business)}
 
 
+@router.post("/businesses/{business_id}/configure-voice")
+async def configure_voice_ai(
+    business_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """
+    Create or update the Vapi voice AI assistant for a business.
+
+    This sets up the business-specific system prompt, function tools,
+    voice settings, and greeting. Call this after onboarding a new client
+    or after updating their services/config.
+    """
+    from app.services.vapi import create_or_update_assistant, VapiUnavailableError
+
+    result = await db.execute(
+        select(Business).where(Business.id == uuid.UUID(business_id))
+    )
+    business = result.scalar_one_or_none()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+
+    if not settings.vapi_api_key:
+        raise HTTPException(
+            status_code=400,
+            detail="VAPI_API_KEY not configured. Add it to .env first.",
+        )
+
+    try:
+        assistant_id = await create_or_update_assistant(db, business)
+        return {
+            "status": "configured",
+            "vapi_assistant_id": assistant_id,
+            "business_id": business_id,
+        }
+    except VapiUnavailableError as e:
+        raise HTTPException(status_code=502, detail=f"Vapi API error: {e}")
+
+
+@router.post("/businesses/{business_id}/test-call")
+async def test_voice_call(
+    business_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """
+    Initiate a test call to verify voice AI is working.
+
+    Requires JSON body: {"phone": "+1XXXXXXXXXX"}
+    Vapi will call the provided number using the business's assistant.
+    """
+    from app.services.vapi import transfer_call_to_vapi, VapiUnavailableError
+
+    body = await request.json()
+    test_phone = body.get("phone")
+    if not test_phone:
+        raise HTTPException(status_code=400, detail="Provide 'phone' in request body")
+
+    result = await db.execute(
+        select(Business).where(Business.id == uuid.UUID(business_id))
+    )
+    business = result.scalar_one_or_none()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+
+    if not business.vapi_assistant_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Voice AI not configured. Call /configure-voice first.",
+        )
+
+    try:
+        # Use a dummy call ID for the test
+        test_call_id = uuid.uuid4()
+        vapi_call_id = await transfer_call_to_vapi(
+            business=business,
+            caller_phone=test_phone,
+            call_id=test_call_id,
+        )
+        return {
+            "status": "call_initiated",
+            "vapi_call_id": vapi_call_id,
+            "test_phone": test_phone,
+            "business_id": business_id,
+            "message": f"Vapi is calling {test_phone} now. Answer to test the voice AI.",
+        }
+    except VapiUnavailableError as e:
+        raise HTTPException(status_code=502, detail=f"Vapi API error: {e}")
+
+
 @router.post("/businesses/{business_id}/provision")
 async def provision_number(
     business_id: str,

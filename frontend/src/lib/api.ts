@@ -41,6 +41,7 @@ export interface Lead {
   source: string;
   estimated_value: number | null;
   preferred_time: string | null;
+  qualification_source: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -52,6 +53,8 @@ export interface Conversation {
   lead_id: string;
   call_id: string | null;
   status: string;
+  channel: string;
+  voice_transcript: string | null;
   follow_up_count: number;
   next_follow_up_at: string | null;
   qualification_data: Record<string, unknown>;
@@ -85,6 +88,12 @@ export interface Call {
   is_after_hours: boolean;
   recording_url: string | null;
   transcription: string | null;
+  voice_ai_used: boolean;
+  voice_ai_transcript: string | null;
+  voice_ai_duration_seconds: number | null;
+  voice_ai_cost: number | null;
+  line_type: string | null;
+  vapi_call_id: string | null;
   created_at: string;
 }
 
@@ -245,7 +254,7 @@ export const getConversations = (token: string, status?: string) =>
   );
 
 export const getConversation = (token: string, id: string) =>
-  apiFetch<{ conversation: Conversation; messages: Message[] }>(`/api/conversations/${id}`, { token });
+  apiFetch<{ conversation: Conversation; messages: Message[]; call: Call | null }>(`/api/conversations/${id}`, { token });
 
 export const takeoverConversation = (token: string, id: string) =>
   apiFetch<{ conversation: Conversation }>(`/api/conversations/${id}/takeover`, { token, method: "POST" });

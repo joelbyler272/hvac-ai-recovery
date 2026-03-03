@@ -15,7 +15,7 @@ import {
 } from "@/lib/api";
 import { formatPhone } from "@/lib/utils";
 import { useRealtimeMessages } from "@/hooks/use-realtime";
-import { Send, Bot, User, ArrowLeftRight, AlertTriangle, MessageSquare } from "lucide-react";
+import { Send, Bot, User, ArrowLeftRight, AlertTriangle, MessageSquare, Phone, Mic } from "lucide-react";
 import { SkeletonList } from "@/components/ui/skeleton";
 
 export default function ConversationsPage() {
@@ -66,6 +66,7 @@ export default function ConversationsPage() {
 
   const convo = detailData?.conversation;
   const messages = detailData?.messages || [];
+  const callData = detailData?.call;
 
   return (
     <DashboardLayout>
@@ -93,9 +94,16 @@ export default function ConversationsPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-navy truncate">
-                        {c.lead_name || formatPhone(c.lead_phone || "Unknown")}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        {c.channel === "voice" ? (
+                          <Phone className="h-3.5 w-3.5 text-teal" />
+                        ) : (
+                          <MessageSquare className="h-3.5 w-3.5 text-slate-muted" />
+                        )}
+                        <p className="text-sm font-medium text-navy truncate">
+                          {c.lead_name || formatPhone(c.lead_phone || "Unknown")}
+                        </p>
+                      </div>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${
                           c.status === "human_active"
@@ -133,9 +141,17 @@ export default function ConversationsPage() {
               {/* Chat Header */}
               <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-navy">
-                    {convo.lead_name || "Unknown"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-navy">
+                      {convo.lead_name || "Unknown"}
+                    </p>
+                    {convo.channel === "voice" && (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-teal/10 text-teal flex items-center gap-1">
+                        <Mic className="h-3 w-3" />
+                        Voice
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs">
                     {convo.status === "human_active" ? (
                       <span className="text-purple-600">You are responding</span>
@@ -156,6 +172,52 @@ export default function ConversationsPage() {
                   {convo.status === "human_active" ? "Return to AI" : "Take Over"}
                 </button>
               </div>
+
+              {/* Voice AI Transcript + Recording (shown above messages for voice conversations) */}
+              {callData?.voice_ai_used && (
+                <div className="bg-white border-b border-gray-200 px-4 py-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Phone className="h-4 w-4 text-teal" />
+                    <span className="text-sm font-medium text-navy">Voice AI Call</span>
+                    {callData.voice_ai_duration_seconds && (
+                      <span className="text-xs text-slate-muted">
+                        {Math.floor(callData.voice_ai_duration_seconds / 60)}m {callData.voice_ai_duration_seconds % 60}s
+                      </span>
+                    )}
+                    {callData.line_type && (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-slate-muted">
+                        {callData.line_type}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Audio Player for call recording */}
+                  {callData.recording_url && (
+                    <div className="mb-2">
+                      <audio
+                        controls
+                        className="w-full h-8"
+                        preload="none"
+                      >
+                        <source src={callData.recording_url} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                  )}
+
+                  {/* Collapsible transcript */}
+                  {(convo.voice_transcript || callData.voice_ai_transcript) && (
+                    <details className="group">
+                      <summary className="text-xs text-teal cursor-pointer hover:text-teal/80 select-none">
+                        View transcript
+                      </summary>
+                      <pre className="mt-2 text-xs text-slate-light bg-gray-50 rounded-lg p-3 max-h-60 overflow-y-auto whitespace-pre-wrap font-sans leading-relaxed">
+                        {convo.voice_transcript || callData.voice_ai_transcript}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              )}
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">

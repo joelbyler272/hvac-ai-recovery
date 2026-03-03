@@ -24,6 +24,7 @@ def lead_to_dict(lead) -> dict:
         "source": lead.source,
         "estimated_value": float(lead.estimated_value) if lead.estimated_value else None,
         "preferred_time": lead.preferred_time,
+        "qualification_source": getattr(lead, "qualification_source", None),
         "notes": lead.notes,
         "created_at": lead.created_at.isoformat() if lead.created_at else None,
         "updated_at": lead.updated_at.isoformat() if lead.updated_at else None,
@@ -37,6 +38,8 @@ def convo_to_dict(convo, lead=None) -> dict:
         "lead_id": str(convo.lead_id),
         "call_id": str(convo.call_id) if convo.call_id else None,
         "status": convo.status,
+        "channel": getattr(convo, "channel", "sms"),
+        "voice_transcript": getattr(convo, "voice_transcript", None),
         "follow_up_count": convo.follow_up_count,
         "next_follow_up_at": convo.next_follow_up_at.isoformat() if convo.next_follow_up_at else None,
         "qualification_data": convo.qualification_data,
@@ -72,6 +75,12 @@ def call_to_dict(call) -> dict:
         "is_after_hours": call.is_after_hours,
         "recording_url": call.recording_url,
         "transcription": call.transcription,
+        "voice_ai_used": getattr(call, "voice_ai_used", False),
+        "voice_ai_transcript": getattr(call, "voice_ai_transcript", None),
+        "voice_ai_duration_seconds": getattr(call, "voice_ai_duration_seconds", None),
+        "voice_ai_cost": float(call.voice_ai_cost) if getattr(call, "voice_ai_cost", None) else None,
+        "line_type": getattr(call, "line_type", None),
+        "vapi_call_id": getattr(call, "vapi_call_id", None),
         "created_at": call.created_at.isoformat() if call.created_at else None,
     }
 
@@ -127,6 +136,10 @@ def biz_to_dict(b) -> dict:
         "ai_instructions": b.ai_instructions,
         "notification_prefs": b.notification_prefs,
         "subscription_status": b.subscription_status,
+        "vapi_assistant_id": getattr(b, "vapi_assistant_id", None),
+        "google_place_id": getattr(b, "google_place_id", None),
+        "call_recording_enabled": getattr(b, "call_recording_enabled", True),
+        "two_party_consent_state": getattr(b, "two_party_consent_state", False),
         "created_at": b.created_at.isoformat() if b.created_at else None,
         "updated_at": b.updated_at.isoformat() if b.updated_at else None,
     }
@@ -157,6 +170,7 @@ def activity_to_dict(item_type: str, item) -> dict:
             "description": f"{'Missed' if item.status == 'missed' else 'Answered'} call from {item.caller_phone}",
             "status": item.status,
             "phone": item.caller_phone,
+            "voice_ai_used": getattr(item, "voice_ai_used", False),
             "timestamp": item.created_at.isoformat() if item.created_at else None,
         }
     elif item_type == "message":

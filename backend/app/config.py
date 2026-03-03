@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     # Subscription cost for ROI calculation
     subscription_cost: float = 497.0
 
-    # Follow-up delays in minutes [second follow-up, third follow-up]
-    follow_up_delay_minutes: str = "1440,4320"
+    # Follow-up delays in minutes (2hr, 24hr per spec)
+    follow_up_delay_minutes: str = "120,1440"
 
     # Owner nudge delay (remind owner to call back qualified leads)
     owner_nudge_delay_minutes: int = 30
