@@ -56,11 +56,20 @@ async def voice_incoming(request: Request, db: AsyncSession = Depends(get_db)):
     )
 
     response = VoiceResponse()
+
+    # Two-party consent: brief recording disclosure before connecting
+    if getattr(business, "two_party_consent_state", False) and getattr(business, "call_recording_enabled", True):
+        response.say(
+            "This call may be recorded for quality and training purposes.",
+            voice="Polly.Joanna",
+        )
+
     dial = response.dial(
         timeout=20,
         action=f"{settings.base_url}/webhook/voice/call-completed?call_id={call.id}",
         method="POST",
         caller_id=to_number,
+        record="record-from-answer-dual" if getattr(business, "call_recording_enabled", True) else "do-not-record",
     )
     dial.number(
         business.business_phone,
@@ -93,6 +102,13 @@ async def call_completed(
 
     if not business or not call:
         response = VoiceResponse()
+        return Response(content=str(response), media_type="application/xml")
+
+    # Subscription guard — still ring the business phone but skip AI recovery
+    if business.subscription_status not in ("active", "trialing"):
+        logger.info(f"Business {business.id} subscription is {business.subscription_status}, skipping recovery")
+        response = VoiceResponse()
+        response.say(f"Thank you for calling {business.name}. Please try again later.")
         return Response(content=str(response), media_type="application/xml")
 
     # === CALL ANSWERED ===

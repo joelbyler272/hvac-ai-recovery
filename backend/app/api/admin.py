@@ -226,3 +226,71 @@ async def system_metrics(
             "voice_ai_calls": voice_ai_calls,
         }
     }
+
+
+@router.get("/monitoring/costs")
+async def monitoring_costs(
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """
+    Per-client cost breakdown: Twilio calls, SMS, Vapi voice AI, estimated OpenAI.
+
+    Returns cost data per business for monitoring profitability.
+    """
+    from sqlalchemy import func
+    from app.models.call import Call
+    from app.models.message import Message
+
+    businesses = (await db.execute(
+        select(Business).order_by(Business.created_at.desc())
+    )).scalars().all()
+
+    costs = []
+    for biz in businesses:
+        # Call counts and Vapi costs
+        call_stats = (await db.execute(
+            select(
+                func.count(Call.id).label("total_calls"),
+                func.count(Call.id).filter(Call.voice_ai_used == True).label("vapi_calls"),
+                func.coalesce(func.sum(Call.voice_ai_cost), 0).label("vapi_cost"),
+                func.coalesce(func.sum(Call.duration_seconds), 0).label("total_minutes"),
+                func.coalesce(
+                    func.sum(Call.voice_ai_duration_seconds).filter(Call.voice_ai_used == True), 0
+                ).label("vapi_minutes"),
+            ).where(Call.business_id == biz.id)
+        )).one()
+
+        # SMS counts
+        sms_count = (await db.execute(
+            select(func.count(Message.id)).where(
+                Message.business_id == biz.id,
+                Message.direction == "outbound",
+            )
+        )).scalar() or 0
+
+        # Estimated costs (rough industry averages)
+        twilio_call_cost = (call_stats.total_minutes / 60) * 0.013  # ~$0.013/min
+        twilio_sms_cost = sms_count * 0.0079  # ~$0.0079/SMS
+        vapi_cost = float(call_stats.vapi_cost)
+        openai_est = sms_count * 0.003  # ~$0.003/conversation turn
+
+        costs.append({
+            "business_id": str(biz.id),
+            "business_name": biz.name,
+            "subscription_status": biz.subscription_status,
+            "total_calls": call_stats.total_calls,
+            "vapi_calls": call_stats.vapi_calls,
+            "sms_sent": sms_count,
+            "costs": {
+                "twilio_voice": round(twilio_call_cost, 2),
+                "twilio_sms": round(twilio_sms_cost, 2),
+                "vapi_voice_ai": round(vapi_cost, 2),
+                "openai_estimated": round(openai_est, 2),
+                "total_estimated": round(
+                    twilio_call_cost + twilio_sms_cost + vapi_cost + openai_est, 2
+                ),
+            },
+        })
+
+    return {"costs": costs}

@@ -34,6 +34,11 @@ def _get_session_factory():
     return _async_session
 
 
+def async_session_factory():
+    """Get a session factory for use outside of FastAPI dependency injection."""
+    return _get_session_factory()()
+
+
 async def get_db() -> AsyncSession:
     session_factory = _get_session_factory()
     async with session_factory() as session:
