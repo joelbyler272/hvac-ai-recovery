@@ -2,11 +2,13 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import get_current_business
 from app.models.business import Business
+from app.models.call import Call
 from app.services.crud import (
     get_conversations,
     get_conversation_detail,
@@ -40,14 +42,28 @@ async def get_conversation(
     business: Business = Depends(get_current_business),
     db: AsyncSession = Depends(get_db),
 ):
-    """Full conversation with messages."""
+    """Full conversation with messages, voice transcript, and recording."""
     convo = await get_conversation_detail(db, business.id, uuid.UUID(conversation_id))
     if not convo:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     messages = await get_conversation_messages(db, uuid.UUID(conversation_id))
+
+    # Load call record for recording URL if this is a voice conversation
+    recording_url = None
+    if convo.call_id:
+        call_result = await db.execute(
+            select(Call).where(Call.id == convo.call_id)
+        )
+        call = call_result.scalar_one_or_none()
+        if call:
+            recording_url = call.recording_url
+
+    result = convo_to_dict(convo)
+    result["recording_url"] = recording_url
+
     return {
-        "conversation": convo_to_dict(convo),
+        "conversation": result,
         "messages": [msg_to_dict(m) for m in messages],
     }
 
@@ -94,8 +110,6 @@ async def send_manual_message(
     if not convo:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    # Get lead phone from conversation
-    from sqlalchemy import select
     from app.models.lead import Lead
 
     lead_result = await db.execute(select(Lead).where(Lead.id == convo.lead_id))
