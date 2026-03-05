@@ -149,9 +149,91 @@ def send_follow_up(conversation_id: str):
         session.close()
 
 
+@celery_app.task(name="send_owner_nudge")
+def send_owner_nudge(business_id: str, lead_id: str):
+    """Remind the business owner to call back a qualified lead after 30 minutes."""
+    from app.models.business import Business
+    from app.models.lead import Lead
+    from app.models.owner_nudge import OwnerNudge
+
+    session = _get_sync_session()
+    try:
+        business = session.execute(
+            select(Business).where(Business.id == business_id)
+        ).scalar_one_or_none()
+
+        lead = session.execute(
+            select(Lead).where(Lead.id == lead_id)
+        ).scalar_one_or_none()
+
+        if not business or not lead:
+            return
+
+        # Skip if lead is already booked or completed
+        if lead.status in ("booked", "completed"):
+            return
+
+        # Check if nudge was already acknowledged
+        existing = session.execute(
+            select(OwnerNudge).where(
+                OwnerNudge.business_id == business.id,
+                OwnerNudge.lead_id == lead.id,
+                OwnerNudge.status == "acknowledged",
+            )
+        ).scalar_one_or_none()
+
+        if existing:
+            return
+
+        # Build nudge message
+        name = lead.name or "Unknown caller"
+        service = lead.service_needed or "HVAC service"
+        phone = lead.phone
+
+        # Calculate actual minutes since lead was created
+        if lead.created_at:
+            delta = datetime.utcnow() - lead.created_at
+            minutes_ago = int(delta.total_seconds() / 60)
+        else:
+            minutes_ago = settings.owner_nudge_delay_minutes
+
+        nudge_msg = (
+            f"Reminder: {name} is waiting for a callback about {service}. "
+            f"Phone: {phone}. They called {minutes_ago} minutes ago."
+        )
+
+        try:
+            from twilio.rest import Client
+
+            client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+            client.messages.create(
+                to=business.owner_phone,
+                from_=business.twilio_number,
+                body=nudge_msg,
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send owner nudge SMS: {e}")
+
+        # Record the nudge
+        nudge = OwnerNudge(
+            business_id=business.id,
+            lead_id=lead.id,
+            status="sent",
+            sent_at=datetime.utcnow(),
+        )
+        session.add(nudge)
+        session.commit()
+
+    except Exception as e:
+        logger.error(f"Owner nudge task failed: {e}")
+        session.rollback()
+    finally:
+        session.close()
+
+
 @celery_app.task(name="send_review_request")
 def send_review_request(review_request_id: str):
-    """Send a review request SMS."""
+    """Send a review request SMS with Google review direct link."""
     from app.models.review_request import ReviewRequest
     from app.models.business import Business
     from app.models.lead import Lead
@@ -181,11 +263,23 @@ def send_review_request(review_request_id: str):
 
             client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
             name = lead.name or "there"
-            msg = (
-                f"Hi {name}! Thanks for choosing {business.name}. "
-                f"We'd love to hear how we did. Could you leave us a quick review? "
-                f"It really helps! Thanks!"
-            )
+
+            # Build Google review direct link if google_place_id is configured
+            google_place_id = getattr(business, "google_place_id", None)
+            if google_place_id:
+                review_link = f"https://search.google.com/local/writereview?placeid={google_place_id}"
+                msg = (
+                    f"Hi {name}! Thanks for choosing {business.name}. "
+                    f"If we did a good job, would you mind leaving a quick Google review? "
+                    f"It really helps! {review_link}"
+                )
+            else:
+                msg = (
+                    f"Hi {name}! Thanks for choosing {business.name}. "
+                    f"We'd love to hear how we did. Could you leave us a quick review? "
+                    f"It really helps! Thanks!"
+                )
+
             client.messages.create(
                 to=lead.phone, from_=business.twilio_number, body=msg
             )
@@ -247,10 +341,20 @@ def send_review_reminder(review_request_id: str):
             from twilio.rest import Client
 
             client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
-            msg = (
-                f"Just a friendly reminder from {business.name} - "
-                f"we'd really appreciate a quick review when you get a chance. Thanks!"
-            )
+
+            google_place_id = getattr(business, "google_place_id", None)
+            if google_place_id:
+                review_link = f"https://search.google.com/local/writereview?placeid={google_place_id}"
+                msg = (
+                    f"Friendly reminder from {business.name} — we'd really appreciate "
+                    f"a quick review when you get a chance. {review_link} Thanks!"
+                )
+            else:
+                msg = (
+                    f"Just a friendly reminder from {business.name} - "
+                    f"we'd really appreciate a quick review when you get a chance. Thanks!"
+                )
+
             client.messages.create(
                 to=lead.phone, from_=business.twilio_number, body=msg
             )
