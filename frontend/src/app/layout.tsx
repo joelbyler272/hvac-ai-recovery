@@ -11,7 +11,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CallHook - Never Lose a Job to a Missed Call",
+  title: "DialHook - Never Lose a Job to a Missed Call",
   description: "AI-powered missed call recovery for HVAC businesses. Catch every lead, book every job.",
 };
 

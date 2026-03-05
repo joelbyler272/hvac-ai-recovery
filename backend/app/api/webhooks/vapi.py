@@ -56,16 +56,16 @@ async def vapi_call_ended(request: Request, db: AsyncSession = Depends(get_db)):
     call_data = message.get("call", {})
     vapi_call_id = call_data.get("id")
     metadata = call_data.get("metadata", {})
-    callhook_call_id = metadata.get("callhook_call_id")
+    dialhook_call_id = metadata.get("dialhook_call_id")
     business_id = metadata.get("business_id")
 
-    if not callhook_call_id or not business_id:
-        logger.warning("Vapi call-ended webhook missing callhook metadata")
+    if not dialhook_call_id or not business_id:
+        logger.warning("Vapi call-ended webhook missing dialhook metadata")
         return JSONResponse({"ok": True})
 
     # Load call and business
     call_result = await db.execute(
-        select(Call).where(Call.id == uuid.UUID(callhook_call_id))
+        select(Call).where(Call.id == uuid.UUID(dialhook_call_id))
     )
     call = call_result.scalar_one_or_none()
 
@@ -75,7 +75,7 @@ async def vapi_call_ended(request: Request, db: AsyncSession = Depends(get_db)):
     business = business_result.scalar_one_or_none()
 
     if not call or not business:
-        logger.warning(f"Vapi call-ended: call or business not found (call={callhook_call_id})")
+        logger.warning(f"Vapi call-ended: call or business not found (call={dialhook_call_id})")
         return JSONResponse({"ok": True})
 
     # Extract data from Vapi payload
@@ -310,10 +310,10 @@ async def vapi_function_call(request: Request, db: AsyncSession = Depends(get_db
 
     call_data = message.get("call", {})
     metadata = call_data.get("metadata", {})
-    callhook_call_id = metadata.get("callhook_call_id")
+    dialhook_call_id = metadata.get("dialhook_call_id")
     business_id_str = metadata.get("business_id")
 
-    if not callhook_call_id or not business_id_str:
+    if not dialhook_call_id or not business_id_str:
         return JSONResponse({"result": "Missing metadata"})
 
     # Load business
@@ -324,7 +324,7 @@ async def vapi_function_call(request: Request, db: AsyncSession = Depends(get_db
 
     # Load call and find conversation/lead
     call_result = await db.execute(
-        select(Call).where(Call.id == uuid.UUID(callhook_call_id))
+        select(Call).where(Call.id == uuid.UUID(dialhook_call_id))
     )
     call = call_result.scalar_one_or_none()
 

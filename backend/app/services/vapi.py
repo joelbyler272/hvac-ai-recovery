@@ -246,7 +246,7 @@ async def create_or_update_assistant(
         max_duration = config.max_call_duration_seconds
 
     assistant_payload = {
-        "name": f"CallHook - {business.name}",
+        "name": f"DialHook - {business.name}",
         "model": {
             "provider": "openai",
             "model": "gpt-4o-mini",
@@ -345,7 +345,7 @@ async def transfer_call_to_vapi(
         },
         "phoneNumberId": None,  # Uses Vapi's default number; configure per-business in production
         "metadata": {
-            "callhook_call_id": str(call_id),
+            "dialhook_call_id": str(call_id),
             "business_id": str(business.id),
         },
     }

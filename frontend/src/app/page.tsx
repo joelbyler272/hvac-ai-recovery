@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-function CallHookLogo() {
+function DialHookLogo() {
   return (
-    <svg viewBox="0 0 360 80" className="h-10 w-auto mx-auto" aria-label="CallHook">
+    <svg viewBox="0 0 360 80" className="h-10 w-auto mx-auto" aria-label="DialHook">
       <g transform="translate(4, 8)">
         <path
           d="M2 24 L16 44 L16 12 C16 5 21 0 28 0 C35 0 40 5 40 12"
@@ -43,7 +43,7 @@ function CallHookLogo() {
         fontSize="40"
         letterSpacing="-1.5"
       >
-        <tspan fill="#1B2A4A">Call</tspan>
+        <tspan fill="#1B2A4A">Dial</tspan>
         <tspan fill="#E86A2A">Hook</tspan>
       </text>
     </svg>
@@ -99,7 +99,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-warm-white">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
-          <CallHookLogo />
+          <DialHookLogo />
           <p className="mt-3 text-slate-light">
             Never lose a job to a missed call.
           </p>

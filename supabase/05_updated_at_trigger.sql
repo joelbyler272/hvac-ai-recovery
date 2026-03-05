@@ -1,5 +1,5 @@
 -- ============================================================
--- CallHook — Supabase Setup: Step 5 — Auto-update timestamps
+-- DialHook — Supabase Setup: Step 5 — Auto-update timestamps
 -- ============================================================
 -- Automatically set updated_at on row changes.
 -- The backend ORM handles this too, but this ensures it works

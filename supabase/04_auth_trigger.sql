@@ -1,5 +1,5 @@
 -- ============================================================
--- CallHook — Supabase Setup: Step 4 — Auth Trigger
+-- DialHook — Supabase Setup: Step 4 — Auth Trigger
 -- ============================================================
 -- This trigger automatically creates a Business record when
 -- a new user signs up via Supabase Auth. The business starts

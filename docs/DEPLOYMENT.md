@@ -1,4 +1,4 @@
-# CallHook Production Deployment Guide
+# DialHook Production Deployment Guide
 
 ## Architecture
 
@@ -17,7 +17,7 @@ Three Railway services, one Vercel app, one Supabase project.
 ## Step 1: Supabase Production Project
 
 1. Go to [supabase.com](https://supabase.com) → New Project
-2. Name: `callhook-prod`, Region: closest to your users
+2. Name: `dialhook-prod`, Region: closest to your users
 3. Save the generated database password
 4. Once created, go to **Settings → API** and copy:
    - Project URL → `SUPABASE_URL`
@@ -53,7 +53,7 @@ Three Railway services, one Vercel app, one Supabase project.
 - **Root Directory:** `backend`
 - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - **Health Check Path:** `/health`
-- Generate a domain (e.g., `callhook-api.up.railway.app`)
+- Generate a domain (e.g., `dialhook-api.up.railway.app`)
 
 ### Service 2: Worker
 - **Root Directory:** `backend`
@@ -76,8 +76,8 @@ Set these on all three backend services:
 ```
 # Core
 ENVIRONMENT=production
-BASE_URL=https://callhook-api.up.railway.app
-ALLOWED_ORIGINS=https://app.callhook.com
+BASE_URL=https://dialhook-api.up.railway.app
+ALLOWED_ORIGINS=https://app.dialhook.com
 ADMIN_API_KEY=<generate a strong random key>
 DEBUG=false
 
@@ -103,7 +103,7 @@ OPENAI_API_KEY=<your OpenAI key>
 
 # Resend
 RESEND_API_KEY=<your Resend key>
-EMAIL_FROM_ADDRESS=CallHook <notifications@yourdomain.com>
+EMAIL_FROM_ADDRESS=DialHook <notifications@yourdomain.com>
 
 # Stripe
 STRIPE_SECRET_KEY=<your Stripe secret key>
@@ -131,26 +131,26 @@ OWNER_NUDGE_DELAY_MINUTES=30
 ```
 NEXT_PUBLIC_SUPABASE_URL=<from step 1>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<from step 1>
-NEXT_PUBLIC_API_URL=https://callhook-api.up.railway.app
+NEXT_PUBLIC_API_URL=https://dialhook-api.up.railway.app
 NEXT_PUBLIC_SENTRY_DSN=<your Sentry DSN, client-safe>
 ```
 
-6. Deploy. Vercel gives you a URL like `callhook-dashboard.vercel.app`
-7. (Optional) Add custom domain: `app.callhook.com`
+6. Deploy. Vercel gives you a URL like `dialhook-dashboard.vercel.app`
+7. (Optional) Add custom domain: `app.dialhook.com`
 
 ---
 
 ## Step 4: Twilio Webhook Configuration
 
 1. Go to [Twilio Console](https://console.twilio.com) → Phone Numbers
-2. For each CallHook Twilio number, set:
-   - **Voice → A Call Comes In:** Webhook `https://callhook-api.up.railway.app/webhook/voice/incoming` (POST)
-   - **Messaging → A Message Comes In:** Webhook `https://callhook-api.up.railway.app/webhook/sms/incoming` (POST)
-   - **Messaging → Status Callback:** `https://callhook-api.up.railway.app/webhook/sms/status` (POST)
+2. For each DialHook Twilio number, set:
+   - **Voice → A Call Comes In:** Webhook `https://dialhook-api.up.railway.app/webhook/voice/incoming` (POST)
+   - **Messaging → A Message Comes In:** Webhook `https://dialhook-api.up.railway.app/webhook/sms/incoming` (POST)
+   - **Messaging → Status Callback:** `https://dialhook-api.up.railway.app/webhook/sms/status` (POST)
 
 ### Test it:
 ```bash
-curl https://callhook-api.up.railway.app/health
+curl https://dialhook-api.up.railway.app/health
 # Should return: {"status":"healthy","version":"1.0.0"}
 ```
 
@@ -159,7 +159,7 @@ curl https://callhook-api.up.railway.app/health
 ## Step 5: Stripe Webhook
 
 1. Go to [Stripe Dashboard](https://dashboard.stripe.com) → Developers → Webhooks
-2. Add endpoint: `https://callhook-api.up.railway.app/webhook/stripe/`
+2. Add endpoint: `https://dialhook-api.up.railway.app/webhook/stripe/`
 3. Select events:
    - `invoice.payment_succeeded`
    - `invoice.payment_failed`
@@ -174,8 +174,8 @@ curl https://callhook-api.up.railway.app/health
 
 1. Go to [sentry.io](https://sentry.io) → Create Project
 2. Create **two projects**:
-   - `callhook-api` (Python / FastAPI)
-   - `callhook-dashboard` (Next.js)
+   - `dialhook-api` (Python / FastAPI)
+   - `dialhook-dashboard` (Next.js)
 3. Copy each project's DSN
 4. Set `SENTRY_DSN` on Railway (backend)
 5. Set `NEXT_PUBLIC_SENTRY_DSN` on Vercel (frontend)
@@ -200,7 +200,7 @@ Required for reliable SMS delivery. Without it, 30-80% of messages get carrier-f
 ## Step 8: Vapi Webhook Configuration
 
 1. Go to [Vapi Dashboard](https://dashboard.vapi.ai)
-2. Settings → Webhooks → Server URL: `https://callhook-api.up.railway.app/webhook/vapi/call-ended`
+2. Settings → Webhooks → Server URL: `https://dialhook-api.up.railway.app/webhook/vapi/call-ended`
 3. Set a webhook secret → `VAPI_WEBHOOK_SECRET` env var
 
 ---
@@ -223,13 +223,13 @@ After deployment, verify each piece:
 
 ## Custom Domain (Optional)
 
-### API: `api.callhook.com`
-- Railway → Service → Settings → Custom Domain → add `api.callhook.com`
-- Add CNAME record in your DNS: `api.callhook.com → <railway-provided-target>`
-- Update `BASE_URL` env var to `https://api.callhook.com`
+### API: `api.dialhook.com`
+- Railway → Service → Settings → Custom Domain → add `api.dialhook.com`
+- Add CNAME record in your DNS: `api.dialhook.com → <railway-provided-target>`
+- Update `BASE_URL` env var to `https://api.dialhook.com`
 - Update Twilio webhook URLs to use the new domain
 
-### Frontend: `app.callhook.com`
-- Vercel → Project → Settings → Domains → add `app.callhook.com`
-- Add CNAME record in your DNS: `app.callhook.com → cname.vercel-dns.com`
-- Update `ALLOWED_ORIGINS` on Railway to `https://app.callhook.com`
+### Frontend: `app.dialhook.com`
+- Vercel → Project → Settings → Domains → add `app.dialhook.com`
+- Add CNAME record in your DNS: `app.dialhook.com → cname.vercel-dns.com`
+- Update `ALLOWED_ORIGINS` on Railway to `https://app.dialhook.com`

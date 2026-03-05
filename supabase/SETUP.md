@@ -1,6 +1,6 @@
 # Supabase Setup Guide
 
-Complete guide to set up Supabase for CallHook.
+Complete guide to set up Supabase for DialHook.
 
 ## 1. Create a Supabase Project
 

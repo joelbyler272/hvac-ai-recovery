@@ -28,10 +28,10 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-function CallHookLogo({ collapsed }: { collapsed?: boolean }) {
+function DialHookLogo({ collapsed }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
-      <svg viewBox="0 0 50 60" className="h-7 w-auto" aria-label="CallHook">
+      <svg viewBox="0 0 50 60" className="h-7 w-auto" aria-label="DialHook">
         <g transform="translate(4, 8)">
           <path
             d="M2 24 L16 44 L16 12 C16 5 21 0 28 0 C35 0 40 5 40 12"
@@ -55,7 +55,7 @@ function CallHookLogo({ collapsed }: { collapsed?: boolean }) {
   }
 
   return (
-    <svg viewBox="0 0 360 80" className="h-8 w-auto" aria-label="CallHook">
+    <svg viewBox="0 0 360 80" className="h-8 w-auto" aria-label="DialHook">
       <g transform="translate(4, 8)">
         <path
           d="M2 24 L16 44 L16 12 C16 5 21 0 28 0 C35 0 40 5 40 12"
@@ -90,7 +90,7 @@ function CallHookLogo({ collapsed }: { collapsed?: boolean }) {
         fontSize="40"
         letterSpacing="-1.5"
       >
-        <tspan fill="currentColor">Call</tspan>
+        <tspan fill="currentColor">Dial</tspan>
         <tspan fill="#E86A2A">Hook</tspan>
       </text>
     </svg>
@@ -115,7 +115,7 @@ export function Sidebar({
       }`}
     >
       <div className={`flex items-center ${collapsed ? "justify-center p-3" : "justify-between p-6"}`}>
-        <CallHookLogo collapsed={collapsed} />
+        <DialHookLogo collapsed={collapsed} />
         <button
           onClick={onToggle}
           className={`p-1 rounded hover:bg-navy-light transition-colors ${collapsed ? "hidden" : ""}`}
@@ -202,7 +202,7 @@ export function MobileSidebar({
         }`}
       >
         <div className="flex items-center justify-between p-6">
-          <CallHookLogo />
+          <DialHookLogo />
           <button
             onClick={onClose}
             className="p-1 rounded hover:bg-navy-light transition-colors"
@@ -254,7 +254,7 @@ export function MobileHeader({ onMenuOpen }: { onMenuOpen: () => void }) {
       <button onClick={onMenuOpen} className="p-1" aria-label="Open menu">
         <Menu className="h-5 w-5" />
       </button>
-      <CallHookLogo />
+      <DialHookLogo />
     </header>
   );
 }

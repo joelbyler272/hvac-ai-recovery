@@ -1,5 +1,5 @@
 -- ============================================================
--- CallHook — Supabase Setup: Step 3 — Realtime
+-- DialHook — Supabase Setup: Step 3 — Realtime
 -- ============================================================
 -- Enable Supabase Realtime (postgres_changes) on the tables
 -- the frontend subscribes to. This allows the dashboard to
