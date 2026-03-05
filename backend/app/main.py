@@ -2,6 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+
+# Sentry error tracking — initialized before app creation
+_settings = get_settings()
+if _settings.sentry_dsn:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=_settings.sentry_dsn,
+        environment=_settings.environment,
+        traces_sample_rate=0.1 if _settings.environment == "production" else 1.0,
+        profiles_sample_rate=0.1 if _settings.environment == "production" else 0,
+    )
 from app.api.webhooks.voice import router as voice_router
 from app.api.webhooks.sms import router as sms_router
 from app.api.webhooks.vapi import router as vapi_router

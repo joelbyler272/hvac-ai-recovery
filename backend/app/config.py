@@ -65,6 +65,9 @@ class Settings(BaseSettings):
     microsoft_client_id: str = ""
     microsoft_client_secret: str = ""
 
+    # Sentry (error tracking)
+    sentry_dsn: str = ""
+
     model_config = {
         "env_file": str(_env_file),
         "env_file_encoding": "utf-8",

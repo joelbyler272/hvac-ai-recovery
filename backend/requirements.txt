@@ -43,3 +43,6 @@ psycopg2-binary==2.9.10
 stripe==11.4.1
 
 # Vapi.ai (Voice AI) — uses httpx for API calls (already installed)
+
+# Error tracking
+sentry-sdk[fastapi]==2.19.2
