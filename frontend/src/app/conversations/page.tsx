@@ -15,7 +15,19 @@ import {
 } from "@/lib/api";
 import { formatPhone } from "@/lib/utils";
 import { useRealtimeMessages } from "@/hooks/use-realtime";
-import { Send, Bot, User, ArrowLeftRight, AlertTriangle, MessageSquare } from "lucide-react";
+import {
+  Send,
+  Bot,
+  User,
+  ArrowLeftRight,
+  AlertTriangle,
+  MessageSquare,
+  Mic,
+  Phone,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { SkeletonList } from "@/components/ui/skeleton";
 
 export default function ConversationsPage() {
@@ -23,6 +35,7 @@ export default function ConversationsPage() {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
+  const [showTranscript, setShowTranscript] = useState(false);
 
   useRealtimeMessages(selectedId || undefined);
 
@@ -66,6 +79,7 @@ export default function ConversationsPage() {
 
   const convo = detailData?.conversation;
   const messages = detailData?.messages || [];
+  const isVoiceConvo = convo?.channel === "voice";
 
   return (
     <DashboardLayout>
@@ -87,15 +101,25 @@ export default function ConversationsPage() {
               {listData.conversations.map((c: Conversation) => (
                 <li key={c.id}>
                   <button
-                    onClick={() => setSelectedId(c.id)}
+                    onClick={() => {
+                      setSelectedId(c.id);
+                      setShowTranscript(false);
+                    }}
                     className={`w-full text-left px-4 py-3 hover:bg-warm-white transition-colors ${
                       selectedId === c.id ? "bg-ember/5 border-l-2 border-ember" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-navy truncate">
-                        {c.lead_name || formatPhone(c.lead_phone || "Unknown")}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        {c.channel === "voice" ? (
+                          <Phone className="h-3.5 w-3.5 text-teal" />
+                        ) : (
+                          <MessageSquare className="h-3.5 w-3.5 text-slate-muted" />
+                        )}
+                        <p className="text-sm font-medium text-navy truncate">
+                          {c.lead_name || formatPhone(c.lead_phone || "Unknown")}
+                        </p>
+                      </div>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${
                           c.status === "human_active"
@@ -109,7 +133,7 @@ export default function ConversationsPage() {
                       </span>
                     </div>
                     <p className="text-xs text-slate-muted mt-0.5 truncate">
-                      {c.last_message || "No messages yet"}
+                      {c.channel === "voice" ? "Voice AI call" : c.last_message || "No messages yet"}
                     </p>
                   </button>
                 </li>
@@ -133,9 +157,17 @@ export default function ConversationsPage() {
               {/* Chat Header */}
               <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-navy">
-                    {convo.lead_name || "Unknown"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-navy">
+                      {convo.lead_name || "Unknown"}
+                    </p>
+                    {isVoiceConvo && (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-teal/10 text-teal">
+                        <Mic className="h-3 w-3" />
+                        Voice AI
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs">
                     {convo.status === "human_active" ? (
                       <span className="text-purple-600">You are responding</span>
@@ -157,39 +189,105 @@ export default function ConversationsPage() {
                 </button>
               </div>
 
+              {/* Voice AI Panel: Recording + Transcript */}
+              {isVoiceConvo && (convo.recording_url || convo.voice_transcript) && (
+                <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-2">
+                  {/* Audio Player */}
+                  {convo.recording_url && (
+                    <div className="flex items-center gap-3">
+                      <Mic className="h-4 w-4 text-teal flex-shrink-0" />
+                      <audio
+                        controls
+                        className="flex-1 h-8"
+                        src={convo.recording_url}
+                      >
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                  )}
+
+                  {/* Transcript Toggle */}
+                  {convo.voice_transcript && (
+                    <div>
+                      <button
+                        onClick={() => setShowTranscript(!showTranscript)}
+                        className="flex items-center gap-1.5 text-xs font-medium text-slate-light hover:text-navy transition-colors"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {showTranscript ? "Hide" : "Show"} Voice Transcript
+                        {showTranscript ? (
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                      {showTranscript && (
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm text-navy max-h-60 overflow-y-auto space-y-1.5">
+                          {convo.voice_transcript.split("\n").map((line: string, i: number) => {
+                            const isAssistant = line.toLowerCase().startsWith("assistant:");
+                            const isUser = line.toLowerCase().startsWith("user:");
+                            return (
+                              <p
+                                key={i}
+                                className={`${
+                                  isAssistant
+                                    ? "text-teal"
+                                    : isUser
+                                    ? "text-navy"
+                                    : "text-slate-muted"
+                                }`}
+                              >
+                                {line}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messages.map((msg: Message) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.direction === "outbound" ? "justify-end" : "justify-start"
-                    }`}
-                  >
+                {messages.length === 0 && isVoiceConvo ? (
+                  <div className="text-center py-8 text-slate-muted">
+                    <Phone className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">Voice AI conversation — see transcript above</p>
+                  </div>
+                ) : (
+                  messages.map((msg: Message) => (
                     <div
-                      className={`max-w-[70%] rounded-lg px-4 py-2.5 ${
-                        msg.direction === "outbound"
-                          ? msg.sender_type === "human"
-                            ? "bg-purple-100 text-purple-900"
-                            : "bg-ember/10 text-navy"
-                          : "bg-white text-navy border border-gray-200"
+                      key={msg.id}
+                      className={`flex ${
+                        msg.direction === "outbound" ? "justify-end" : "justify-start"
                       }`}
                     >
-                      <div className="flex items-center gap-1 mb-0.5">
-                        {msg.sender_type === "ai" ? (
-                          <Bot className="h-3 w-3" />
-                        ) : msg.sender_type === "human" ? (
-                          <User className="h-3 w-3" />
-                        ) : null}
-                        <span className="text-xs opacity-60">{msg.sender_type}</span>
+                      <div
+                        className={`max-w-[70%] rounded-lg px-4 py-2.5 ${
+                          msg.direction === "outbound"
+                            ? msg.sender_type === "human"
+                              ? "bg-purple-100 text-purple-900"
+                              : "bg-ember/10 text-navy"
+                            : "bg-white text-navy border border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1 mb-0.5">
+                          {msg.sender_type === "ai" ? (
+                            <Bot className="h-3 w-3" />
+                          ) : msg.sender_type === "human" ? (
+                            <User className="h-3 w-3" />
+                          ) : null}
+                          <span className="text-xs opacity-60">{msg.sender_type}</span>
+                        </div>
+                        <p className="text-sm">{msg.body}</p>
+                        <p className="text-xs mt-1 opacity-50">
+                          {new Date(msg.created_at).toLocaleTimeString()}
+                        </p>
                       </div>
-                      <p className="text-sm">{msg.body}</p>
-                      <p className="text-xs mt-1 opacity-50">
-                        {new Date(msg.created_at).toLocaleTimeString()}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Message Input (only when human active) */}

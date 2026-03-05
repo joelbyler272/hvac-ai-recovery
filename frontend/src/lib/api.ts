@@ -26,6 +26,7 @@ export interface Activity {
   description: string;
   time_ago: string;
   body_preview?: string;
+  voice_ai_used?: boolean;
 }
 
 export interface Lead {
@@ -41,6 +42,7 @@ export interface Lead {
   source: string;
   estimated_value: number | null;
   preferred_time: string | null;
+  qualification_source: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -52,6 +54,9 @@ export interface Conversation {
   lead_id: string;
   call_id: string | null;
   status: string;
+  channel: string;
+  voice_transcript: string | null;
+  recording_url: string | null;
   follow_up_count: number;
   next_follow_up_at: string | null;
   qualification_data: Record<string, unknown>;
@@ -85,6 +90,12 @@ export interface Call {
   is_after_hours: boolean;
   recording_url: string | null;
   transcription: string | null;
+  voice_ai_used: boolean;
+  voice_ai_transcript: string | null;
+  voice_ai_duration_seconds: number | null;
+  voice_ai_cost: number | null;
+  line_type: string;
+  vapi_call_id: string | null;
   created_at: string;
 }
 
@@ -151,6 +162,8 @@ export interface BusinessSettings {
     quiet_start: string;
     quiet_end: string;
   };
+  vapi_assistant_id?: string | null;
+  google_place_id?: string | null;
 }
 
 export interface Service {
