@@ -343,7 +343,7 @@ async def transfer_call_to_vapi(
         "customer": {
             "number": caller_phone,
         },
-        "phoneNumberId": None,  # Uses Vapi's default number; configure per-business in production
+        "phoneNumberId": "40a65cd8-c784-4f0a-b954-b5fcffcf1d09",  # TODO: store per-business
         "metadata": {
             "dialhook_call_id": str(call_id),
             "business_id": str(business.id),
