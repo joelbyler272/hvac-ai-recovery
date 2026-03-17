@@ -55,7 +55,7 @@ async def vapi_call_ended(request: Request, db: AsyncSession = Depends(get_db)):
     message = payload.get("message", {})
     call_data = message.get("call", {})
     vapi_call_id = call_data.get("id")
-    metadata = call_data.get("metadata", {})
+    metadata = call_data.get("metadata") or {}
     dialhook_call_id = metadata.get("dialhook_call_id")
     business_id = metadata.get("business_id")
 
@@ -309,7 +309,7 @@ async def vapi_function_call(request: Request, db: AsyncSession = Depends(get_db
     fn_params = function_call.get("parameters", {})
 
     call_data = message.get("call", {})
-    metadata = call_data.get("metadata", {})
+    metadata = call_data.get("metadata") or {}
     dialhook_call_id = metadata.get("dialhook_call_id")
     business_id_str = metadata.get("business_id")
 
