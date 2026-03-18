@@ -257,12 +257,20 @@ async def create_or_update_assistant(
         },
         "voice": {
             "provider": "11labs",
-            "voiceId": config.voice_id if config and config.voice_id else "21m00Tcm4TlvDq8ikWAM",
+            "voiceId": config.voice_id if config and config.voice_id else "pFZP5JQG7iQjIQuC4Bku",
+            "stability": 0.6,
+            "similarityBoost": 0.75,
+            "optimizeStreamingLatency": 3,
         },
         "firstMessage": greeting,
         "maxDurationSeconds": max_duration,
         "serverUrl": f"{settings.base_url}/webhook/vapi/call-ended",
         "recordingEnabled": business.call_recording_enabled,
+        "backgroundSound": "off",
+        "backgroundDenoisingEnabled": True,
+        "modelOutputInMessagesEnabled": True,
+        "silenceTimeoutSeconds": 30,
+        "responseDelaySeconds": 0.5,
     }
 
     try:
